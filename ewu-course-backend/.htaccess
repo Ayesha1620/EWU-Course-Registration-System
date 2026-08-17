@@ -1,0 +1,6 @@
+# Apache-এ pretty URL পেতে (http://localhost/ewu-course-backend/api/...)
+# .htaccess না থাকলেও index.php/api/... এভাবে URL দিয়ে কাজ হবে
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
