@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EWU Course Registration System - Member 3 Frontend</title>
+  
+  <!-- ==========================================
+       ১. Tailwind CSS CDN Integration (UI Styling)
+       ========================================== -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans">
+
+  <!-- ==========================================
+       ২. Navigation Bar & Header Component
+       ========================================== -->
+  <header class="bg-blue-900 text-white p-4 shadow-md flex justify-between items-center">
+    <h1 class="text-xl font-bold">EWU Course Registration System</h1>
+    <div class="text-sm flex items-center gap-3">
+      <span>User Status: <span class="font-semibold" id="currentUser">Not Logged In</span></span>
+      <button onclick="logout()" id="logoutBtn" class="hidden bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-3 py-1 rounded">Logout</button>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs (ক্লিক করে বিভিন্ন পেজে যাওয়ার সিস্টেম) -->
+  <nav class="bg-white border-b px-4 flex gap-4 text-sm font-medium overflow-x-auto">
+    <button data-role="public" onclick="switchTab('loginTab')" class="py-3 px-2 border-b-2 border-blue-600 text-blue-600 font-semibold">1. Login Screen</button>
+    <button data-role="student" onclick="switchTab('studentTab')" class="py-3 px-2 border-b-2 border-transparent hover:border-slate-300 hidden">2. Student Screen</button>
+    <button data-role="advisor" onclick="switchTab('advisorTab')" class="py-3 px-2 border-b-2 border-transparent hover:border-slate-300 hidden">3. Advisor Screen</button>
+    <button data-role="faculty,advisor" onclick="switchTab('facultyTab')" class="py-3 px-2 border-b-2 border-transparent hover:border-slate-300 hidden">4. Faculty Screen</button>
+    <button data-role="faculty,advisor" onclick="switchTab('adminTab')" class="py-3 px-2 border-b-2 border-transparent hover:border-slate-300 hidden">5. Admin Screen</button>
+  </nav>
+
+  <main class="p-6 max-w-6xl mx-auto">
+
+    <!-- ==========================================
+         ৩. Login Screen & Form (User Authentication)
+         ========================================== -->
+    <section id="loginTab" class="tab-content">
+      <div class="max-w-md mx-auto bg-white p-6 rounded-xl shadow border mt-6">
+        <h2 class="text-xl font-bold mb-4 text-center text-slate-800">System Login</h2>
+        <form id="loginForm" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Email or User ID</label>
+            <input type="text" id="loginEmail" required class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Password</label>
+            <input type="password" id="loginPassword" required class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Role</label>
+            <select id="loginRole" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+              <option value="student">Student</option>
+              <option value="faculty">Faculty / Advisor</option>
+            </select>
+          </div>
+          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded transition">Login</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         ৪. Student Course Registration Screen & Table
+         ========================================== -->
+    <section id="studentTab" class="tab-content space-y-6 hidden">
+      <h2 class="text-2xl font-bold text-slate-800">Student Course Registration</h2>
+      
+      <!-- Offered Courses Table (কোর্স দেখার ও রেজিস্টার করার টেবিল) -->
+      <div class="bg-white rounded-xl shadow border overflow-hidden">
+        <div class="p-4 bg-slate-50 border-b font-semibold">Offered Courses & Sections</div>
+        <table class="w-full text-left text-sm">
+          <thead class="bg-slate-100 uppercase text-xs text-slate-700">
+            <tr>
+              <th class="p-3">Course</th>
+              <th class="p-3">Sec</th>
+              <th class="p-3">Schedule</th>
+              <th class="p-3">Room</th>
+              <th class="p-3">Faculty</th>
+              <th class="p-3">Action</th>
+            </tr>
+          </thead>
+          <tbody id="studentCourseList" class="divide-y">
+            <tr>
+              <td class="p-3 font-medium">CSE311 - Database Systems</td>
+              <td class="p-3">01</td>
+              <td class="p-3">ST (08:30 - 10:00)</td>
+              <td class="p-3">AB2-401</td>
+              <td class="p-3">Dr. Ahmed</td>
+              <td class="p-3">
+                <button onclick="registerCourse(101)" class="bg-blue-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-blue-700">Register</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         ৫. Advisor Approval Portal Screen & Actions
+         ========================================== -->
+    <section id="advisorTab" class="tab-content space-y-6 hidden">
+      <h2 class="text-2xl font-bold text-slate-800">Advisor Approval Requests</h2>
+      
+      <!-- Student Requests Table (স্টুডেন্টের রিকোয়েস্ট দেখার টেবিল) -->
+      <div class="bg-white rounded-xl shadow border overflow-hidden">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-slate-100 uppercase text-xs text-slate-700">
+            <tr>
+              <th class="p-3">Student Name & ID</th>
+              <th class="p-3">Requested Course</th>
+              <th class="p-3">Status</th>
+              <th class="p-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="advisorApprovalList" class="divide-y">
+            <tr>
+              <td class="p-3 font-medium">Rahim Ali (2021-1-60-001)</td>
+              <td class="p-3">CSE311 (Sec 01)</td>
+              <td class="p-3"><span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded font-semibold">Pending</span></td>
+              <td class="p-3 space-x-2">
+                <button onclick="updateApprovalStatus(1, 'Approved')" class="bg-emerald-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-emerald-700">Approve</button>
+                <button onclick="updateApprovalStatus(1, 'Rejected')" class="bg-rose-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-rose-700">Reject</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         ৬. Faculty Grade Entry Screen & Form Validation
+         ========================================== -->
+    <section id="facultyTab" class="tab-content space-y-6 hidden">
+      <h2 class="text-2xl font-bold text-slate-800">Faculty Grade Entry Sheet</h2>
+      
+      <!-- Marks Input Form (কুইজ, মিড ও ফাইনাল মার্কস বসানোর ফরম) -->
+      <div class="bg-white p-6 rounded-xl shadow border">
+        <form id="gradeEntryForm" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <input type="text" id="regId" placeholder="Registration ID" required class="border p-2 rounded text-sm">
+          <input type="number" id="quiz" placeholder="Quiz (Max 20)" min="0" max="20" required class="border p-2 rounded text-sm">
+          <input type="number" id="mid" placeholder="Mid (Max 30)" min="0" max="30" required class="border p-2 rounded text-sm">
+          <input type="number" id="final" placeholder="Final (Max 50)" min="0" max="50" required class="border p-2 rounded text-sm">
+          <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded text-sm">Submit Grade</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         ৭. Admin Setup Screen (Course & Department Management)
+         ========================================== -->
+    <section id="adminTab" class="tab-content space-y-6 hidden">
+      <h2 class="text-2xl font-bold text-slate-800">Admin Course Setup</h2>
+      
+      <!-- Add Course Form (নতুন কোর্স তৈরি করার ফর্ম) -->
+      <div class="bg-white p-6 rounded-xl shadow border">
+        <h3 class="text-lg font-semibold mb-4">Add New Course</h3>
+        <form id="addCourseForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <input type="text" id="courseCode" placeholder="Course Code (e.g. CSE311)" required class="border p-2 rounded text-sm">
+          <input type="text" id="courseName" placeholder="Course Name" required class="border p-2 rounded text-sm">
+          <input type="number" id="credit" placeholder="Credit" required class="border p-2 rounded text-sm">
+          <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white font-medium py-2 rounded text-sm">Add Course</button>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================
+       ৮. JavaScript (Navigation, Validations, & Backend API Logic)
+       ========================================== -->
+  <script>
+    // ব্যাকএন্ড API এন্ডপয়েন্ট এর মূল লিংক (XAMPP: http://localhost/ewu-course-backend/api)
+    // PHP built-in server হলে: 'http://localhost:8000/api'
+    const API_BASE = 'http://localhost/ewu-course-backend/api';
+
+    let currentUser = null;
+
+    // ===== Common fetch helper (token + error handling সহ) =====
+    function getToken() {
+      return localStorage.getItem('token');
+    }
+
+    async function api(path, options = {}) {
+      const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+      const token = getToken();
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+      let data = null;
+      try { data = await res.json(); } catch (e) { /* no body */ }
+
+      if (!res.ok) {
+        throw new Error((data && data.message) || `Request failed (${res.status})`);
+      }
+      return data ? data.data : null;
+    }
+
+    // [কাজের নাম: Tab Switch Logic] - বিভিন্ন স্ক্রিনে ক্লিক করে যাওয়ার ফাংশন
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(tabId).classList.remove('hidden');
+
+      if (tabId === 'studentTab') loadSections();
+      if (tabId === 'advisorTab') loadApprovals();
+    }
+
+    // login user এর role অনুযায়ী nav button দেখানো/লুকানো
+    function applyRole(role) {
+      document.querySelectorAll('nav button[data-role]').forEach(btn => {
+        const roles = btn.dataset.role.split(',');
+        btn.classList.toggle('hidden', role !== null && !roles.includes(role));
+      });
+    }
+
+    // ===== Login =====
+    document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const role = document.getElementById('loginRole').value;
+
+      try {
+        const data = await api('/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ email, password, role })
+        });
+
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        currentUser = data.user;
+
+        const name = currentUser.StudentName || currentUser.FacultyName || email;
+        document.getElementById('currentUser').innerText = `${name} (${currentUser.role})`;
+        document.getElementById('logoutBtn').classList.remove('hidden');
+
+        applyRole(currentUser.role);
+        alert('Login Successful!');
+
+        if (currentUser.role === 'student') switchTab('studentTab');
+        else if (currentUser.role === 'advisor') switchTab('advisorTab');
+        else switchTab('facultyTab');
+      } catch (err) {
+        alert('Login Failed: ' + err.message);
+      }
+    });
+
+    // ===== Logout =====
+    async function logout() {
+      try { await api('/auth/logout', { method: 'POST' }); } catch (e) { /* ignore */ }
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      currentUser = null;
+      document.getElementById('currentUser').innerText = 'Not Logged In';
+      document.getElementById('logoutBtn').classList.add('hidden');
+      applyRole(null);
+      switchTab('loginTab');
+      alert('Logged out');
+    }
+
+    // ===== Student: offered sections list (GET /sections) =====
+    async function loadSections() {
+      const tbody = document.getElementById('studentCourseList');
+      tbody.innerHTML = '<tr><td colspan="6" class="p-3 text-center text-slate-400">Loading...</td></tr>';
+      try {
+        const sections = await api('/sections');
+        if (!sections || sections.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="p-3 text-center text-slate-400">No sections available</td></tr>';
+          return;
+        }
+        tbody.innerHTML = sections.map(sec => `
+          <tr>
+            <td class="p-3 font-medium">${sec.CourseCode} - ${sec.CourseName}</td>
+            <td class="p-3">${sec.SectionNumber}</td>
+            <td class="p-3">${sec.ScheduleDay || 'TBA'} (${sec.StartTime || '-'} - ${sec.EndTime || '-'})</td>
+            <td class="p-3">${sec.Building || ''} ${sec.RoomNumber || ''}</td>
+            <td class="p-3">${sec.FacultyName || '-'}</td>
+            <td class="p-3">
+              <button onclick="registerCourse(${sec.SectionID})" class="bg-blue-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-blue-700">Register</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-3 text-center text-rose-500">${err.message}</td></tr>`;
+      }
+    }
+
+    // ===== Student: register course (POST /registrations) =====
+    async function registerCourse(sectionId) {
+      try {
+        await api('/registrations', {
+          method: 'POST',
+          body: JSON.stringify({ section_id: sectionId })
+        });
+        alert('Course Registration Request Sent!');
+      } catch (err) {
+        alert('Registration failed: ' + err.message);
+      }
+    }
+
+    // ===== Advisor: approval requests list (GET /approvals) =====
+    async function loadApprovals() {
+      const tbody = document.getElementById('advisorApprovalList');
+      tbody.innerHTML = '<tr><td colspan="4" class="p-3 text-center text-slate-400">Loading...</td></tr>';
+      try {
+        const approvals = await api('/approvals');
+        if (!approvals || approvals.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4" class="p-3 text-center text-slate-400">No requests</td></tr>';
+          return;
+        }
+        tbody.innerHTML = approvals.map(a => {
+          const status = a.ApprovalStatus || a.RegStatus || 'Pending';
+          const badge = status === 'Approved' ? 'bg-emerald-100 text-emerald-800'
+            : status === 'Rejected' ? 'bg-rose-100 text-rose-800'
+            : 'bg-yellow-100 text-yellow-800';
+          return `
+            <tr>
+              <td class="p-3 font-medium">${a.StudentName} (${a.StudentID})</td>
+              <td class="p-3">${a.CourseCode} (Sec ${a.SectionNumber})</td>
+              <td class="p-3"><span class="${badge} text-xs px-2 py-1 rounded font-semibold">${status}</span></td>
+              <td class="p-3 space-x-2">
+                <button onclick="updateApprovalStatus(${a.RegistrationID}, 'Approved')" class="bg-emerald-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-emerald-700">Approve</button>
+                <button onclick="updateApprovalStatus(${a.RegistrationID}, 'Rejected')" class="bg-rose-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-rose-700">Reject</button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-rose-500">${err.message}</td></tr>`;
+      }
+    }
+
+    // ===== Advisor: approve/reject (PUT /approvals/{registrationId}) =====
+    async function updateApprovalStatus(registrationId, status) {
+      try {
+        await api(`/approvals/${registrationId}`, {
+          method: 'PUT',
+          body: JSON.stringify({ status, remarks: '' })
+        });
+        alert(`Request ${registrationId} has been ${status}`);
+        loadApprovals();
+      } catch (err) {
+        alert('Action failed: ' + err.message);
+      }
+    }
+
+    // ===== Faculty: grade letter/point calculation (EWU scale) =====
+    function computeGrade(total) {
+      if (total >= 90) return { letter: 'A+', point: 4.00 };
+      if (total >= 85) return { letter: 'A',  point: 3.75 };
+      if (total >= 80) return { letter: 'A-', point: 3.50 };
+      if (total >= 75) return { letter: 'B+', point: 3.25 };
+      if (total >= 70) return { letter: 'B',  point: 3.00 };
+      if (total >= 65) return { letter: 'B-', point: 2.75 };
+      if (total >= 60) return { letter: 'C+', point: 2.50 };
+      if (total >= 55) return { letter: 'C',  point: 2.25 };
+      if (total >= 50) return { letter: 'C-', point: 2.00 };
+      if (total >= 45) return { letter: 'D',  point: 1.75 };
+      return { letter: 'F', point: 0.00 };
+    }
+
+    // ===== Faculty: submit grade (POST /grades) =====
+    document.getElementById('gradeEntryForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const regId = document.getElementById('regId').value;
+      const quiz = Number(document.getElementById('quiz').value);
+      const mid = Number(document.getElementById('mid').value);
+      const final = Number(document.getElementById('final').value);
+
+      if (quiz > 20 || mid > 30 || final > 50) {
+        alert('Validation Error: Quiz max 20, Mid max 30, Final max 50!');
+        return;
+      }
+
+      const { letter, point } = computeGrade(quiz + mid + final);
+      try {
+        await api('/grades', {
+          method: 'POST',
+          body: JSON.stringify({
+            RegistrationID: regId,
+            QuizMark: quiz,
+            MidMark: mid,
+            FinalMark: final,
+            GradeLetter: letter,
+            GradePoint: point
+          })
+        });
+        alert(`Grade Submitted Successfully! (${letter}, ${point.toFixed(2)})`);
+        e.target.reset();
+      } catch (err) {
+        alert('Grade submission failed: ' + err.message);
+      }
+    });
+
+    // ===== Admin: add course (POST /courses) =====
+    document.getElementById('addCourseForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await api('/courses', {
+          method: 'POST',
+          body: JSON.stringify({
+            CourseCode: document.getElementById('courseCode').value.trim(),
+            CourseName: document.getElementById('courseName').value.trim(),
+            Credit: Number(document.getElementById('credit').value)
+          })
+        });
+        alert('Course Added Successfully!');
+        e.target.reset();
+      } catch (err) {
+        alert('Failed to add course: ' + err.message);
+      }
+    });
+
+    // ===== Init: restore session if token exists =====
+    (function init() {
+      const saved = localStorage.getItem('user');
+      if (saved) {
+        try {
+          currentUser = JSON.parse(saved);
+          document.getElementById('currentUser').innerText =
+            `${currentUser.StudentName || currentUser.FacultyName} (${currentUser.role})`;
+          document.getElementById('logoutBtn').classList.remove('hidden');
+          applyRole(currentUser.role);
+          switchTab(currentUser.role === 'student' ? 'studentTab'
+            : currentUser.role === 'advisor' ? 'advisorTab' : 'facultyTab');
+        } catch (e) { /* corrupted storage — treat as logged out */ }
+      }
+    })();
+  </script>
+</body>
+</html>
